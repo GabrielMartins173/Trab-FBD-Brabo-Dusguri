@@ -195,7 +195,7 @@ public class DataBase {
         return false;
     }
 
-	public String checkIdByName(String nome) {
+	public String getIdByName(String nome) {
 
         try{
             String query = "select usuario_id\r\n" +

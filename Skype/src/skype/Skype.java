@@ -31,8 +31,9 @@ public class Skype {
                     System.out.println("Digite Sua Senha:");
                     password = scan.nextLine();
 
-                    id_logado = db.checkIdByName(nome);
+                    id_logado = db.getIdByName(nome);
 
+                    System.out.println(id_logado);
 
                     if (verifyLogin(nome, password)) {
                         while (x != 0) {
