@@ -19,6 +19,7 @@ public class Skype {
 
         while (option != 0) {
 
+            x=1;
             System.out.println("Digite 1 Para Utilizar a Aplicação.");
             System.out.println("Digite 0 Para Sair.");
             option = scan.nextInt();
@@ -35,16 +36,15 @@ public class Skype {
                     id_logado = db.getIdByName(nome);
 
                     if (verifyLogin(nome, password)) {
-                        while (x != 7) {
+                        while (x != 0) {
                             System.out.println("1 - Criar Chat com Usuário.");
                             System.out.println("2 - Listar todos os seus contatos.");
                             System.out.println("3 - Olhar o seu calendário.");
-                            System.out.println("4 - Criar Chat Privado.");
-                            System.out.println("5 - Olhar Lista de Contatos.");
-                            System.out.println("6 - Comprar Assinatura Premium.");
-                            System.out.println("7 - Deslogar. ");
+                            System.out.println("4 - Olhar chat.");
+                            System.out.println("0 - Deslogar. ");
                             System.out.println("Digite o que voce quer fazer: ");
                             x = scan.nextInt();
+                            scan.nextLine();
 
                             if (db.isConnected()) {
                                 if (x == 1) {
@@ -54,6 +54,7 @@ public class Skype {
                                     System.out.println("2 - Criar Novo Chat.");
 
                                     y = scan.nextInt();
+                                    scan.nextLine();
 
                                     if(y==1){
                                         db.usarChat(id_logado);
@@ -65,12 +66,8 @@ public class Skype {
                                 else if (x == 3)
                                     db.olhaCalendario(id_logado);
                                 else if (x == 4)
-                                    System.out.println("1");
-                                else if (x == 5)
-                                    System.out.println("1");
-                                else if (x == 6)
-                                    System.out.println("1");
-                                else if (x == 7)
+                                    db.olhaChat(id_logado);
+                                else if (x == 0)
                                     System.out.println("Deslogando...");
                             } else {
                                 System.out.println("Não foi possível realizar a conexão com o Banco de Dados. ");
@@ -80,8 +77,10 @@ public class Skype {
                     } else {
                         System.out.println("Você Não está Autenticado !");
                     }
+                    break;
                 case 0:
                     System.out.println("Até logo :) ");
+                    break;
             }
 
         }

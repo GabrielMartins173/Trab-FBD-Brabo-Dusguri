@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class DataBase {
 
     private static int chatId = 6;
-    private static int mensagemId = 9;
+    private static int mensagemId = 10;
     private static int chamadaId = 2;
     Scanner scan = new Scanner(System.in);
 
@@ -48,14 +48,15 @@ public class DataBase {
     public boolean verifyLogin(String nome, String password) {
 
         try {
-            String query = "select distinct nome, senha\r\n" +
-                    "from usuario;";
+            String query = "select usuario_id\r\n" +
+                    "from usuario\r\n" +
+                    "where nome = '"+ nome +"' and senha = '"+ password +"';";
 
             this.resultset = this.statement.executeQuery(query);
             this.statement = this.connection.createStatement();
             while (this.resultset.next()) {
 
-                if (this.resultset.getString("nome").equals(nome) && this.resultset.getString("senha").equals(password)) {
+                if (!resultset.getString("usuario_id").isBlank()) {
                     return true;
                 } else {
                     return false;
@@ -210,40 +211,41 @@ public class DataBase {
         int x = 7;
         int userId;
 
-        while (x!= 3) {
+        while (x != 3) {
             System.out.println("Selecione o que voce desejar fazer com o chat:");
             System.out.println("1 - Adicionar usuario ao chat.");
             System.out.println("2 - Escrever Mensagem.");
             System.out.println("3 - Sair.");
 
             x = scan.nextInt();
+            scan.nextLine();
 
-            if(x==1){
+            if (x == 1) {
 
                 userId = selecionaUsuario(idLogado);
 
                 String query = "INSERT INTO CHAT (CHAT_ID, NUMERO_DE_PARTICIPANTES,USUARIO_ID, PRIVILEGIO_ADMIN)\r\n" +
-                        "VALUES("+ idChat +", "+ participantes +","+ userId +", FALSE);";
+                        "VALUES(" + idChat + ", " + participantes + "," + userId + ", FALSE);";
 
                 this.statement.executeUpdate(query);
                 this.statement = this.connection.createStatement();
 
                 participantes++;
 
-                String query2 = "UPDATE CHAT SET NUMERO_DE_PARTICIPANTES = 3 WHERE CHAT_ID = "+ idChat +";";
+                String query2 = "UPDATE CHAT SET NUMERO_DE_PARTICIPANTES = 3 WHERE CHAT_ID = " + idChat + ";";
                 this.statement.executeUpdate(query2);
                 this.statement = this.connection.createStatement();
 
                 System.out.println("Usuario adicionado com Sucesso!");
 
-            }else if(x==2){
+            } else if (x == 2) {
 
                 System.out.println("Digite qual mensagem deseja inserir:");
 
                 String mensagem = scan.nextLine();
 
                 String query = "INSERT INTO MENSAGEM(MENSAGEM_ID, CONTEUDO, CHAT_ID, ARQUIVO_ID, USUARIO_ID, DATA_DE_ENVIO)\r\n" +
-                        "VALUES("+mensagemId+",'"+ mensagem + "',"+ idChat +", null, "+ idLogado +", CURDATE());";
+                        "VALUES(" + mensagemId + ",'" + mensagem + "'," + idChat + ", null, " + idLogado + ", CURDATE());";
 
                 this.statement.executeUpdate(query);
                 this.statement = this.connection.createStatement();
@@ -252,7 +254,7 @@ public class DataBase {
 
                 System.out.println("Mensagem inserida com sucesso!");
 
-            }else{
+            } else {
                 System.out.println("Escolha uma opção válida ! (1,2 ou 3).");
             }
         }
@@ -277,4 +279,53 @@ public class DataBase {
         return scan.nextInt();
     }
 
+    public void olhaChat(String id_logado) {
+
+        int idChat;
+
+        try {
+
+            String query = "SELECT DISTINCT CHAT_ID, U.NOME FROM CHAT \n" +
+                    "JOIN USUARIO U USING(USUARIO_ID)\n" +
+                    "WHERE U.NOME <> 1\n" +
+                    "AND CHAT_ID IN (SELECT DISTINCT CHAT_ID FROM CHAT \n" +
+                    "WHERE USUARIO_ID = " + id_logado + ")\n" +
+                    "ORDER BY CHAT_ID;";
+
+            this.resultset = this.statement.executeQuery(query);
+            this.statement = this.connection.createStatement();
+
+            System.out.println("Selecione o chat que você deseja olhar:");
+
+            while (resultset.next()) {
+
+                System.out.println("Id: " + this.resultset.getString("chat_id") +
+                        "\nNome do Chat: " + this.resultset.getString("u.nome") + '\n');
+            }
+
+            idChat = scan.nextInt();
+            scan.nextLine();
+
+            String query2 = "SELECT U.NOME, CONTEUDO, A.*, DATA_DE_ENVIO FROM MENSAGEM M\n" +
+                    "JOIN CHAT C ON C.CHAT_ID = M.CHAT_ID\n" +
+                    "JOIN USUARIO U ON M.USUARIO_ID = U.USUARIO_ID\n" +
+                    "LEFT JOIN ARQUIVO A USING (ARQUIVO_ID)\n" +
+                    "WHERE C.CHAT_ID = " + idChat + "\n" +
+                    "AND M.USUARIO_ID = C.USUARIO_ID\n" +
+                    "ORDER BY DATA_DE_ENVIO;";
+
+            this.resultset = this.statement.executeQuery(query2);
+            this.statement = this.connection.createStatement();
+
+            while (resultset.next()) {
+
+                System.out.println(this.resultset.getString("u.nome") + ":" + this.resultset.getString("conteudo") +
+                        "\nData de Envio: " + this.resultset.getString("data_de_envio") + '\n');
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+
+    }
 }
